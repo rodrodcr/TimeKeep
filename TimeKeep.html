@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="TimeKeep">
+<meta name="theme-color" content="#F3F6FA">
+<title>TimeKeep 5.3</title>
+<style>
+:root{
+  --bg:#F3F6FA;--surface:#FFFFFF;--surface2:#F7F9FC;--text:#172033;--text2:#5D6A7C;
+  --muted:#8995A6;--line:#DDE5EF;--navy:#203B5F;--navy2:#294D79;--blue:#5D94D6;
+  --blueSoft:#E8F0FA;--green:#4F8B76;--greenSoft:#E6F1EC;--amber:#9D7A3A;--amberSoft:#F4EBD9;
+  --red:#B96872;--redSoft:#F6E8EA;--shadow:0 10px 26px rgba(37,55,77,.08);--nav:76px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",sans-serif}
+body{min-height:100dvh}button,input,select,textarea{font:inherit}button{cursor:pointer}
+.app{max-width:480px;margin:0 auto;min-height:100dvh;position:relative}
+.topbar{position:sticky;top:0;z-index:50;padding:max(15px,env(safe-area-inset-top)) 18px 12px;background:rgba(243,246,250,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(32,59,95,.05)}
+.toprow{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:11px}.brandmark{width:36px;height:36px;border-radius:12px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:850;box-shadow:0 7px 18px rgba(32,59,95,.18)}
+.brandtext{font-size:19px;font-weight:820;letter-spacing:-.45px}.brandsub{font-size:10px;color:var(--muted);margin-top:1px;font-weight:650}
+.iconbtn{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--navy);display:flex;align-items:center;justify-content:center;font-size:20px}
+.content{padding:14px 14px calc(var(--nav) + 28px + env(safe-area-inset-bottom))}
+.view{display:none}.view.active{display:block}
+.hero{background:#fff;border:1px solid var(--line);border-radius:22px;padding:15px 16px 14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.kicker{font-size:9px;font-weight:850;letter-spacing:1.25px;text-transform:uppercase;color:#6D83A0}
+.hero-title{font-size:22px;font-weight:820;letter-spacing:-.75px;margin-top:5px;color:#1E2D44}
+.hero-sub{font-size:10.5px;color:#7C8A9E;line-height:1.45;margin-top:5px}
+.pager{display:flex;align-items:center;justify-content:space-between;margin:0 2px 8px;min-height:30px}
+.pageinfo{font-size:10px;font-weight:750;color:#8090A7}.pagedots{display:flex;gap:5px;margin-top:3px}.pdot{width:6px;height:6px;border-radius:50%;background:#D2DCE7}.pdot.on{width:18px;border-radius:10px;background:#4E7FAF}
+.pager-actions{display:flex;gap:6px}.pager-btn{width:30px;height:30px;border-radius:10px;border:1px solid var(--line);background:#fff;color:#456381;font-size:18px;display:flex;align-items:center;justify-content:center}
+.dashboard-shell{height:calc(100dvh - 238px);min-height:500px;max-height:680px}
+.dashboard-grid{display:grid;grid-template-columns:1fr;grid-template-rows:repeat(4,minmax(0,1fr));gap:9px;height:100%}
+.age-card{background:linear-gradient(135deg,#203B5F 0%,#294D79 100%);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:16px 20px;box-shadow:0 9px 22px rgba(32,59,95,.13);display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px;position:relative;overflow:hidden;color:#fff}
+.age-card::after{content:"";position:absolute;width:150px;height:150px;border-radius:50%;right:-58px;top:50%;transform:translateY(-50%);border:18px solid rgba(255,255,255,.04);pointer-events:none}
+.card-name{font-size:19px;font-weight:770;letter-spacing:-.35px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:2}
+.card-sub{font-size:9px;color:#A5B6CA;margin-top:4px;text-transform:uppercase;letter-spacing:.9px;font-weight:760}.life-left{display:inline-flex;align-items:center;margin-top:7px;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12);font-size:9px;font-weight:800;color:#fff;letter-spacing:.2px;text-transform:none}
+.age-line{display:flex;align-items:flex-end;justify-content:flex-end;gap:14px;position:relative;z-index:2;white-space:nowrap}
+.metric{display:flex;align-items:flex-end;gap:4px}.metric .num{color:#fff;font-size:26px;font-weight:800;line-height:.88;letter-spacing:-1px}.metric .lab{color:#A7B7CA;font-size:7px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px}
+.metric.primary .num{font-size:50px;letter-spacing:-2.4px}.metric.primary .lab{font-size:9px;margin-bottom:6px}
+.card-star{position:absolute;top:8px;right:9px;border:0;background:transparent;color:rgba(255,255,255,.7);font-size:15px;z-index:4;padding:4px}.card-star.on{color:#FFD978}
+.empty-slot{border:1px dashed #CAD7E4;border-radius:22px;background:#F8FBFD;color:#7F91A8;display:flex;align-items:center;justify-content:center;text-align:center}.empty-plus{font-size:20px}.empty-text{font-size:9.5px;margin-top:4px}
+.bottom-nav{position:fixed;left:50%;transform:translateX(-50%);bottom:0;z-index:100;width:100%;max-width:480px;height:calc(var(--nav) + env(safe-area-inset-bottom));padding:7px 10px env(safe-area-inset-bottom);background:rgba(250,252,255,.97);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.navbtn{border:0;background:transparent;border-radius:14px;color:#8793A5;font-size:10px;font-weight:750;display:flex;align-items:center;justify-content:center;gap:6px}.navbtn.on{background:#E7EEF7;color:#345E89}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.section-title{font-size:24px;font-weight:820;letter-spacing:-.8px}.primary-btn{border:0;border-radius:13px;padding:10px 13px;background:var(--navy);color:#fff;font-size:11px;font-weight:760}
+.toolbar{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:9px}.search{height:42px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:0 12px;color:var(--text);outline:none}.select{height:42px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:0 28px 0 10px;color:var(--text);outline:none}
+.filter-row{display:flex;gap:6px;overflow-x:auto;padding:0 0 8px;scrollbar-width:none}.filter-row::-webkit-scrollbar{display:none}.chip{border:1px solid var(--line);background:#fff;color:#667487;border-radius:999px;padding:7px 10px;font-size:9px;font-weight:760;white-space:nowrap}.chip.on{background:#E6EEF7;color:#2F5B87;border-color:#C9D9EA}
+.item-list{display:flex;flex-direction:column;gap:8px}.item-row{background:#fff;border:1px solid var(--line);border-radius:17px;padding:12px;display:flex;align-items:center;gap:11px;box-shadow:0 6px 18px rgba(37,55,77,.04)}
+.item-icon{width:42px;height:42px;border-radius:13px;background:#E8F0FA;display:flex;align-items:center;justify-content:center;font-size:20px}.item-main{flex:1;min-width:0}.item-name{font-size:13px;font-weight:780;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.item-meta{font-size:9.5px;color:var(--muted);margin-top:3px}.item-actions{display:flex;gap:5px}.mini{width:31px;height:31px;border-radius:9px;border:1px solid var(--line);background:#F7F9FC;color:#647387}
+.timeline-list{display:flex;flex-direction:column;gap:9px}.timeline-card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:13px 14px;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
+.t-date{width:48px;height:48px;border-radius:14px;background:#EAF1F8;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#355F89}.t-day{font-size:18px;font-weight:820;line-height:1}.t-mon{font-size:8px;text-transform:uppercase;font-weight:800;letter-spacing:.7px;margin-top:3px}
+.t-title{font-size:12.5px;font-weight:780}.t-sub{font-size:9.5px;color:var(--muted);margin-top:3px}.t-badge{font-size:9px;font-weight:800;padding:6px 8px;border-radius:999px;background:#EEF3F8;color:#526D89;white-space:nowrap}
+.backup-card{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px}.backup-title{font-size:12px;font-weight:800}.backup-sub{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.45}.backup-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.backup-btn{border:1px solid var(--line);background:#F8FAFC;color:#53667D;border-radius:12px;padding:10px;font-size:10px;font-weight:760}.backup-btn.primary{background:#E7EEF7;color:#335F8C}
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(26,34,45,.30);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none;align-items:flex-end;justify-content:center}.modal-overlay.on{display:flex}
+.sheet{width:100%;max-width:480px;background:#F9FBFD;border-radius:27px 27px 0 0;max-height:93dvh;overflow-y:auto;padding:10px 20px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -22px 60px rgba(37,55,77,.20)}
+.handle{width:34px;height:4px;border-radius:3px;background:#CDD6E0;margin:2px auto 18px}.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.sheet-title{font-size:22px;font-weight:820;letter-spacing:-.6px}.close-x{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:#fff;color:#5F6D7E;font-size:24px}
+.form-group{margin-top:14px}.label{display:block;font-size:9px;font-weight:850;letter-spacing:1px;text-transform:uppercase;color:#8995A6;margin-bottom:6px}.field{width:100%;height:48px;border:1px solid #D9E1EA;background:#fff;border-radius:12px;padding:0 12px;color:var(--text);outline:none}.field:focus{border-color:#6F96BD;box-shadow:0 0 0 3px rgba(93,148,214,.10)}textarea.field{height:78px;padding:11px 12px;resize:none}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:9px}.switch-row{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border:1px solid var(--line);border-radius:13px;padding:11px 12px}.switch-copy{font-size:11px;font-weight:760}.switch-sub{font-size:9px;color:var(--muted);margin-top:2px}.switch{width:43px;height:26px;border-radius:20px;background:#CCD5DF;position:relative;border:0}.switch::after{content:"";position:absolute;width:22px;height:22px;border-radius:50%;background:#fff;left:2px;top:2px;box-shadow:0 2px 6px rgba(0,0,0,.14);transition:.18s}.switch.on{background:#557FA8}.switch.on::after{left:19px}
+.icon-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}.icon-opt{height:36px;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:17px}.icon-opt.on{background:#E5EEF8;border-color:#AFC7DE}
+.sheet-actions{display:grid;grid-template-columns:1fr 1.35fr;gap:9px;margin-top:19px}.secondary{border:1px solid var(--line);background:#fff;color:#5E6C7D;border-radius:13px;padding:12px;font-weight:750}.save{border:0;background:var(--navy);color:#fff;border-radius:13px;padding:12px;font-weight:760}.danger{width:100%;border:1px solid #E8D0D5;background:#FBF0F2;color:#AA6873;border-radius:13px;padding:11px;font-weight:730;margin-top:8px}
+.detail-hero{background:linear-gradient(135deg,#203B5F,#294D79);color:#fff;border-radius:20px;padding:16px;margin-top:12px}.detail-name{font-size:18px;font-weight:800}.detail-age{font-size:34px;font-weight:850;letter-spacing:-1.4px;margin-top:10px}.detail-meta{font-size:10px;color:#AFBED0;margin-top:4px}.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}.stat{background:#fff;border:1px solid var(--line);border-radius:13px;padding:10px}.stat-k{font-size:8px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:800}.stat-v{font-size:14px;font-weight:790;margin-top:4px}
+.progress{height:7px;background:#E7EDF4;border-radius:999px;overflow:hidden;margin-top:8px}.progress>div{height:100%;background:#5E8FBE;border-radius:999px}
+.milestones{margin-top:12px}.milestone{display:flex;gap:9px;padding:9px 0;border-bottom:1px solid var(--line)}.milestone:last-child{border-bottom:0}.m-dot{width:8px;height:8px;border-radius:50%;background:#5E8FBE;margin-top:5px}.m-main{flex:1}.m-title{font-size:11px;font-weight:760}.m-meta{font-size:9px;color:var(--muted);margin-top:2px}
+.import-box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:12px}.import-num{font-size:28px;font-weight:840}.import-note{font-size:10px;color:var(--muted);margin-top:4px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav) + 18px + env(safe-area-inset-bottom));z-index:1200;background:#233B56;color:#fff;border-radius:999px;padding:10px 15px;font-size:10px;font-weight:750;opacity:0;pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:translateX(-50%) translateY(-3px)}
+@media(max-width:390px){.age-card{padding:14px 16px}.card-name{font-size:17px}.age-line{gap:9px}.metric.primary .num{font-size:45px}.metric .num{font-size:22px}.metric.primary .lab{font-size:8px}.metric .lab{font-size:6.5px}.dashboard-shell{height:calc(100dvh - 228px);min-height:472px}}
+</style>
+
+<style id="v51-date-mode-fix">
+/* V5.1 — Fecha / Modo: separación real de controles en iPhone */
+.form-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;gap:12px !important;}
+.form-row>.form-group{min-width:0 !important;}
+.form-row>.form-group .field{width:100% !important;min-width:0 !important;max-width:100% !important;}
+#itemDate,#itemMode{display:block !important;width:100% !important;min-width:0 !important;box-sizing:border-box !important;}
+#itemDate{padding-left:12px !important;padding-right:10px !important;text-align:center !important;}
+#itemMode{padding-left:12px !important;padding-right:32px !important;}
+@media(max-width:390px){
+  .form-row{gap:10px !important;}
+  #itemDate,#itemMode{font-size:16px !important;}
+}
+</style>
+
+<style id="v52-date-mode-native-fix">
+/* iOS-safe Fecha / Modo: native controls are isolated from layout sizing */
+.date-mode-row{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:12px!important;width:100%!important;}
+.date-mode-row>.form-group{min-width:0!important;width:100%!important;}
+.control-shell{position:relative;width:100%;height:48px;min-width:0;border:1px solid #D9E1EA;background:#fff;border-radius:12px;overflow:hidden;}
+.control-shell:focus-within{border-color:#6F96BD;box-shadow:0 0 0 3px rgba(93,148,214,.10)}
+.date-display{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:0 10px;color:var(--text);font-size:16px;white-space:nowrap;pointer-events:none;z-index:1;}
+#itemDate{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-width:0!important;max-width:none!important;margin:0!important;padding:0!important;border:0!important;opacity:0!important;appearance:none!important;-webkit-appearance:none!important;z-index:2!important;cursor:pointer;}
+.mode-shell select{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-width:0!important;max-width:none!important;margin:0!important;padding:0 38px 0 14px!important;border:0!important;background:transparent!important;color:var(--text)!important;font-size:16px!important;appearance:none!important;-webkit-appearance:none!important;outline:none!important;}
+.mode-shell::after{content:'⌄';position:absolute;right:13px;top:50%;transform:translateY(-58%);font-size:22px;line-height:1;color:#172033;pointer-events:none;}
+@media(max-width:370px){.date-mode-row{grid-template-columns:1fr!important;gap:10px!important;}}
+</style>
+<style id="v53-target-display">
+.target-row{display:grid;grid-template-columns:1fr;gap:12px;width:100%}
+.target-row .form-group{min-width:0;width:100%}.target-row .field{width:100%;min-width:0;box-sizing:border-box}.target-row label{white-space:nowrap;font-size:10px}
+.target-hint{font-size:9px;color:var(--muted);margin-top:5px;line-height:1.35}
+
+</style>
+
+</head>
+<body>
+<div class="app">
+<header class="topbar"><div class="toprow"><div class="brand"><div class="brandmark">T</div><div><div class="brandtext">TimeKeep</div><div class="brandsub">Tiempo, aniversarios y vida útil</div></div></div><button class="iconbtn" onclick="openEditor()">＋</button></div></header>
+<main class="content">
+<section class="view active" id="view-dashboard">
+  <div class="hero"><div class="kicker">Vista general</div><div class="hero-title">Tus tiempos, en una línea</div><div class="hero-sub">Cuatro contadores por página. Favoritos primero.</div></div>
+  <div class="pager"><div><div class="pageinfo" id="pageInfo">Página 1 de 1</div><div class="pagedots" id="pageDots"></div></div><div class="pager-actions"><button class="pager-btn" onclick="changePage(-1)">‹</button><button class="pager-btn" onclick="changePage(1)">›</button></div></div>
+  <div class="dashboard-shell" id="dashboardTouch"><div class="dashboard-grid" id="dashboardGrid"></div></div>
+</section>
+
+<section class="view" id="view-timeline">
+  <div class="section-head"><div><div class="kicker">Próximamente</div><div class="section-title">Timeline</div></div></div>
+  <div class="filter-row" id="timelineFilters"></div>
+  <div class="timeline-list" id="timelineList"></div>
+</section>
+
+<section class="view" id="view-manage">
+  <div class="section-head"><div><div class="kicker">Administrar</div><div class="section-title">Tus contadores</div></div><button class="primary-btn" onclick="openEditor()">+ Agregar</button></div>
+  <div class="toolbar"><input class="search" id="searchInput" placeholder="Buscar..." oninput="renderManage()"><select class="select" id="sortSelect" onchange="renderManage()"><option value="fav">Favoritos</option><option value="az">A–Z</option><option value="old">Más antiguo</option><option value="new">Más reciente</option><option value="next">Próximo evento</option></select></div>
+  <div class="filter-row" id="categoryFilters"></div>
+  <div class="filter-row"><button class="chip on" id="filter-active" onclick="setArchiveFilter('active')">Activos</button><button class="chip" id="filter-archived" onclick="setArchiveFilter('archived')">Archivados</button><button class="chip" id="filter-all" onclick="setArchiveFilter('all')">Todos</button></div>
+  <div class="item-list" id="itemList"></div>
+  <div class="backup-card"><div class="backup-title">Respaldo avanzado</div><div class="backup-sub">Exporta toda la biblioteca o importa un JSON eligiendo entre fusionar y reemplazar.</div><div class="backup-actions"><button class="backup-btn primary" onclick="exportJSON()">Exportar JSON</button><button class="backup-btn" onclick="document.getElementById('importFile').click()">Importar JSON</button></div><input id="importFile" type="file" accept="application/json,.json" style="display:none" onchange="previewImport(event)"></div>
+</section>
+</main>
+
+<nav class="bottom-nav">
+<button class="navbtn on" id="nav-dashboard" onclick="switchView('dashboard')">▣ Dashboard</button>
+<button class="navbtn" id="nav-timeline" onclick="switchView('timeline')">⌁ Timeline</button>
+<button class="navbtn" id="nav-manage" onclick="switchView('manage')">✎ Editar</button>
+</nav>
+</div>
+
+<div class="modal-overlay" id="editorOverlay"><div class="sheet">
+<div class="handle"></div><div class="sheet-head"><div class="sheet-title" id="sheetTitle">Nuevo contador</div><button class="close-x" onclick="closeEditor()">×</button></div>
+<input type="hidden" id="editId">
+<div class="form-group"><label class="label">Nombre</label><input class="field" id="itemName" maxlength="40" placeholder="Ej. Troy, Ford Territory..."></div>
+<div class="form-row date-mode-row"><div class="form-group"><label class="label">Fecha</label><div class="control-shell date-shell"><div class="date-display" id="dateDisplay">—</div><input id="itemDate" type="date" onchange="syncDateDisplay()"></div></div><div class="form-group"><label class="label">Modo</label><div class="control-shell mode-shell"><select id="itemMode" onchange="updateModeUI()"><option value="elapsed">Tiempo transcurrido</option><option value="countdown">Cuenta regresiva</option></select></div></div></div>
+<div class="form-row"><div class="form-group"><label class="label">Tipo</label><select class="field" id="itemType"><option>Edad</option><option>Uso</option><option>Tiempo conmigo</option><option>Garantía</option><option>Otro</option></select></div><div class="form-group"><label class="label">Categoría</label><input class="field" id="itemCategory" list="categoryOptions" placeholder="Ej. Mascotas"><datalist id="categoryOptions"></datalist></div></div>
+<div class="form-group"><label class="label">Icono</label><div class="icon-grid" id="iconGrid"></div></div>
+<div class="form-group"><label class="label">Nota</label><textarea class="field" id="itemNote" maxlength="180" placeholder="Información útil sobre este contador..."></textarea></div>
+<div class="target-row"><div class="form-group"><label class="label">Vida útil / fecha objetivo opcional</label><input class="field" id="itemTargetDate" type="date"></div><div class="form-group"><label class="label">Mostrar faltante en</label><select class="field" id="itemTargetUnit"><option value="days">Días</option><option value="months">Meses</option><option value="years" selected>Años</option></select></div></div><div class="target-hint">El faltante se mostrará en el Dashboard y en el detalle usando esta unidad.</div>
+<div class="form-group"><div class="switch-row"><div><div class="switch-copy">Favorito</div><div class="switch-sub">Aparece primero en Dashboard y listas.</div></div><button type="button" class="switch" id="favSwitch" onclick="toggleSwitch('favSwitch')"></button></div></div>
+<div class="sheet-actions"><button class="secondary" onclick="closeEditor()">Cancelar</button><button class="save" onclick="saveItem()">Guardar</button></div>
+<button class="secondary" id="detailBtn" style="display:none;width:100%;margin-top:8px" onclick="openDetailFromEditor()">Ver detalle y milestones</button>
+<button class="danger" id="archiveBtn" style="display:none" onclick="toggleArchiveCurrent()">Archivar</button>
+<button class="danger" id="deleteBtn" style="display:none" onclick="deleteCurrent()">Eliminar permanentemente</button>
+</div></div>
+
+<div class="modal-overlay" id="detailOverlay"><div class="sheet">
+<div class="handle"></div><div class="sheet-head"><div class="sheet-title">Detalle</div><button class="close-x" onclick="closeDetail()">×</button></div>
+<div id="detailContent"></div>
+<div class="sheet-actions"><button class="secondary" onclick="shareCurrentCard()">Compartir tarjeta</button><button class="save" onclick="editFromDetail()">Editar</button></div>
+</div></div>
+
+<div class="modal-overlay" id="milestoneOverlay"><div class="sheet">
+<div class="handle"></div><div class="sheet-head"><div class="sheet-title">Nuevo milestone</div><button class="close-x" onclick="closeModal('milestoneOverlay')">×</button></div>
+<input type="hidden" id="milestoneItemId">
+<div class="form-group"><label class="label">Título</label><input class="field" id="milestoneTitle" placeholder="Ej. Primer servicio"></div>
+<div class="form-group"><label class="label">Fecha</label><input class="field" id="milestoneDate" type="date"></div>
+<div class="form-group"><label class="label">Nota</label><textarea class="field" id="milestoneNote" maxlength="160"></textarea></div>
+<div class="sheet-actions"><button class="secondary" onclick="closeModal('milestoneOverlay')">Cancelar</button><button class="save" onclick="saveMilestone()">Guardar</button></div>
+</div></div>
+
+<div class="modal-overlay" id="importOverlay"><div class="sheet">
+<div class="handle"></div><div class="sheet-head"><div class="sheet-title">Importar respaldo</div><button class="close-x" onclick="cancelImport()">×</button></div>
+<div class="import-box"><div class="kicker">Archivo válido</div><div class="import-num" id="importCount">0</div><div class="import-note" id="importInfo"></div></div>
+<div class="sheet-actions"><button class="secondary" onclick="applyImport('merge')">Fusionar</button><button class="save" onclick="applyImport('replace')">Reemplazar</button></div>
+<button class="danger" onclick="cancelImport()">Cancelar importación</button>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY='timekeep_v5_state', LEGACY_KEY='timekeep_items_v1';
+const ICONS=['🎂','🐶','🚗','💻','📱','⌚','📷','🏠','🛵','🎸','🏃','💼','💍','🌱','✈️','⭐'];
+let items=[],currentPage=0,selectedIcon='🎂',archiveFilter='active',categoryFilter='Todas',timelineFilter='Todos',detailId=null,pendingImport=null;
+
+function uid(){return'tk_'+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function localISO(d=new Date()){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function parseLocalDate(s){const p=String(s||'').split('-').map(Number);return p.length===3?new Date(p[0],p[1]-1,p[2],12):null}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function fmtDate(s){const d=parseLocalDate(s);return d?d.toLocaleDateString('es-CR',{day:'2-digit',month:'short',year:'numeric'}):'—'}
+function saveDisk(){localStorage.setItem(KEY,JSON.stringify({version:5.4,items}))}
+function normalizeItem(x){
+  return {
+    id:x.id||uid(),name:String(x.name||'Sin nombre').slice(0,40),date:x.date||localISO(),mode:x.mode||'elapsed',
+    type:x.type||'Edad',category:x.category||guessCategory(x),icon:x.icon||'⏳',note:x.note||'',
+    favorite:!!x.favorite,archived:!!x.archived,targetDate:x.targetDate||'',targetUnit:['days','months','years'].includes(x.targetUnit)?x.targetUnit:'years',milestones:Array.isArray(x.milestones)?x.milestones:[],
+    createdAt:x.createdAt||new Date().toISOString()
+  }
+}
+function guessCategory(x){const t=String(x.type||'').toLowerCase(),n=String(x.name||'').toLowerCase();if(t.includes('edad')||n.includes('troy'))return'Mascotas / Personas';if(n.includes('car')||n.includes('ford')||t.includes('uso'))return'Bienes';return'General'}
+function load(){
+  let raw=null;
+  try{raw=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
+  if(raw&&Array.isArray(raw.items))items=raw.items.map(normalizeItem);
+  else{
+    let old=[];try{old=JSON.parse(localStorage.getItem(LEGACY_KEY)||'[]')}catch(e){}
+    if(Array.isArray(old)&&old.length)items=old.map(normalizeItem)
+  }
+  if(!items.length){
+    const n=new Date();
+    items=[
+      normalizeItem({name:'Troy',date:'2025-01-28',type:'Edad',category:'Mascotas',icon:'🐶',favorite:true}),
+      normalizeItem({name:'Ford Territory',date:'2024-06-01',type:'Uso',category:'Vehículos',icon:'🚗',favorite:true,targetDate:'2029-06-01'}),
+      normalizeItem({name:'MacBook Pro',date:localISO(new Date(n.getFullYear()-1,n.getMonth()-2,n.getDate())),type:'Uso',category:'Tecnología',icon:'💻'}),
+      normalizeItem({name:'Cámara Sony',date:localISO(new Date(n.getFullYear()-2,n.getMonth(),n.getDate())),type:'Uso',category:'Fotografía',icon:'📷'})
+    ];
+  }
+  saveDisk()
+}
+function todayNoon(){const n=new Date();return new Date(n.getFullYear(),n.getMonth(),n.getDate(),12)}
+function ageYMD(startStr,end=todayNoon()){
+  const start=parseLocalDate(startStr);if(!start)return{years:0,months:0,days:0};
+  if(start>end){const r=ageYMD(localISO(end),start);return r}
+  let y=end.getFullYear()-start.getFullYear(),m=end.getMonth()-start.getMonth(),d=end.getDate()-start.getDate();
+  if(d<0){m--;d+=new Date(end.getFullYear(),end.getMonth(),0).getDate()}
+  if(m<0){y--;m+=12}return{years:y,months:m,days:d}
+}
+function displayAge(item){
+  const n=todayNoon(),d=parseLocalDate(item.date);
+  return item.mode==='countdown'&&d&&d>=n?ageYMD(localISO(n),item.date):ageYMD(item.date,n)
+}
+function totalDays(item){
+  const d=parseLocalDate(item.date),n=todayNoon();if(!d)return 0;
+  return Math.max(0,Math.round(Math.abs(d-n)/86400000))
+}
+function nextAnniversary(item){
+  const n=todayNoon(),d=parseLocalDate(item.date);if(!d)return null;
+  if(item.mode==='countdown'&&d>=n)return d;
+  let x=new Date(n.getFullYear(),d.getMonth(),d.getDate(),12);if(x<n)x.setFullYear(x.getFullYear()+1);return x
+}
+function daysUntil(date){return Math.max(0,Math.ceil((date-todayNoon())/86400000))}
+function targetRemaining(item){
+  const t=parseLocalDate(item.targetDate),n=todayNoon();if(!t)return null;
+  if(t<n)return{value:0,label:'Cumplido',expired:true};
+  const unit=item.targetUnit||'years';
+  if(unit==='days'){const v=Math.ceil((t-n)/86400000);return{value:v,label:v===1?'día':'días',expired:false}}
+  const a=ageYMD(localISO(n),t);
+  if(unit==='months'){const v=a.years*12+a.months+(a.days>0?1:0);return{value:v,label:v===1?'mes':'meses',expired:false}}
+  const v=a.years+(a.months>0||a.days>0?1:0);return{value:v,label:v===1?'año':'años',expired:false}
+}
+function targetRemainingText(item){const r=targetRemaining(item);if(!r)return'';return r.expired?'Vida útil cumplida':`Faltan ${r.value} ${r.label}`}
+function sortedActive(){
+  return items.filter(x=>!x.archived).slice().sort((a,b)=>(Number(b.favorite)-Number(a.favorite))||a.name.localeCompare(b.name,'es'))
+}
+function switchView(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');
+  document.querySelectorAll('.navbtn').forEach(x=>x.classList.remove('on'));document.getElementById('nav-'+v).classList.add('on');
+  if(v==='dashboard')renderDashboard();if(v==='timeline')renderTimeline();if(v==='manage')renderManage()
+}
+function renderDashboard(){
+  const all=sortedActive(),pages=Math.max(1,Math.ceil(all.length/4));if(currentPage>=pages)currentPage=pages-1;
+  const slice=all.slice(currentPage*4,currentPage*4+4),g=document.getElementById('dashboardGrid');let h='';
+  slice.forEach(item=>{
+    const a=displayAge(item),evt=nextAnniversary(item),life=targetRemainingText(item);
+    const sub=item.mode==='countdown'?'Cuenta regresiva':`${item.type} · ${item.category}`;
+    h+=`<article class="age-card" onclick="openDetail('${item.id}')">
+      <button class="card-star ${item.favorite?'on':''}" onclick="event.stopPropagation();toggleFavorite('${item.id}')">${item.favorite?'★':'☆'}</button>
+      <div><div class="card-name">${esc(item.name)}</div><div class="card-sub">${esc(sub)}</div>${life?`<div class="life-left">⏳ ${esc(life)}</div>`:''}</div>
+      <div class="age-line">
+        <div class="metric primary"><span class="num">${a.years}</span><span class="lab">Años</span></div>
+        <div class="metric"><span class="num">${a.months}</span><span class="lab">Meses</span></div>
+        <div class="metric"><span class="num">${a.days}</span><span class="lab">Días</span></div>
+      </div></article>`
+  });
+  for(let i=slice.length;i<4;i++)h+=`<button class="empty-slot" onclick="openEditor()"><div><div class="empty-plus">＋</div><div class="empty-text">Agregar contador</div></div></button>`;
+  g.innerHTML=h;document.getElementById('pageInfo').textContent=`Página ${currentPage+1} de ${pages} · ${all.length} activos`;document.getElementById('pageDots').innerHTML=Array.from({length:pages},(_,i)=>`<span class="pdot ${i===currentPage?'on':''}"></span>`).join('')
+}
+function changePage(d){const p=Math.max(1,Math.ceil(sortedActive().length/4));currentPage=(currentPage+d+p)%p;renderDashboard()}
+function toggleFavorite(id){const x=items.find(i=>i.id===id);if(!x)return;x.favorite=!x.favorite;saveDisk();render()}
+function categoryList(){return [...new Set(items.map(x=>x.category||'General'))].sort((a,b)=>a.localeCompare(b,'es'))}
+function renderCategoryOptions(){document.getElementById('categoryOptions').innerHTML=categoryList().map(c=>`<option value="${esc(c)}"></option>`).join('')}
+function setArchiveFilter(v){archiveFilter=v;['active','archived','all'].forEach(x=>document.getElementById('filter-'+x).classList.toggle('on',x===v));renderManage()}
+function setCategoryFilter(v){categoryFilter=v;renderManage()}
+function renderManage(){
+  const q=document.getElementById('searchInput').value.trim().toLowerCase(),sort=document.getElementById('sortSelect').value,cats=['Todas',...categoryList()];
+  document.getElementById('categoryFilters').innerHTML=cats.map(c=>`<button class="chip ${categoryFilter===c?'on':''}" onclick="setCategoryFilter('${c.replace(/'/g,"\\'")}')">${esc(c)}</button>`).join('');
+  let arr=items.filter(x=>(archiveFilter==='all'||(archiveFilter==='archived'?x.archived:!x.archived))&&(categoryFilter==='Todas'||x.category===categoryFilter)&&(!q||(x.name+x.category+x.type+x.note).toLowerCase().includes(q)));
+  if(sort==='fav')arr.sort((a,b)=>(Number(b.favorite)-Number(a.favorite))||a.name.localeCompare(b.name,'es'));
+  if(sort==='az')arr.sort((a,b)=>a.name.localeCompare(b.name,'es'));
+  if(sort==='old')arr.sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  if(sort==='new')arr.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  if(sort==='next')arr.sort((a,b)=>nextAnniversary(a)-nextAnniversary(b));
+  document.getElementById('itemList').innerHTML=arr.length?arr.map(x=>{const a=displayAge(x);return`<div class="item-row"><div class="item-icon">${x.icon}</div><div class="item-main" onclick="openDetail('${x.id}')"><div class="item-name">${x.favorite?'★ ':''}${esc(x.name)}</div><div class="item-meta">${a.years}a ${a.months}m ${a.days}d · ${esc(x.category)}${x.archived?' · Archivado':''}</div></div><div class="item-actions"><button class="mini" onclick="openEditor('${x.id}')">✎</button><button class="mini" onclick="toggleFavorite('${x.id}')">${x.favorite?'★':'☆'}</button></div></div>`}).join(''):'<div class="hero-sub">No hay resultados.</div>'
+}
+function timelineEvents(){
+  return items.filter(x=>!x.archived).map(x=>({item:x,date:nextAnniversary(x)})).filter(x=>x.date).sort((a,b)=>a.date-b.date)
+}
+function setTimelineFilter(v){timelineFilter=v;renderTimeline()}
+function renderTimeline(){
+  const cats=['Todos',...categoryList()];document.getElementById('timelineFilters').innerHTML=cats.map(c=>`<button class="chip ${timelineFilter===c?'on':''}" onclick="setTimelineFilter('${c.replace(/'/g,"\\'")}')">${esc(c)}</button>`).join('');
+  const ev=timelineEvents().filter(e=>timelineFilter==='Todos'||e.item.category===timelineFilter);
+  document.getElementById('timelineList').innerHTML=ev.length?ev.map(e=>{const d=e.date,days=daysUntil(d),m=d.toLocaleDateString('es-CR',{month:'short'}).replace('.','');return`<div class="timeline-card" onclick="openDetail('${e.item.id}')"><div class="t-date"><div class="t-day">${d.getDate()}</div><div class="t-mon">${m}</div></div><div><div class="t-title">${esc(e.item.name)}</div><div class="t-sub">${e.item.mode==='countdown'?'Fecha objetivo':'Próximo aniversario'} · ${esc(e.item.category)}</div></div><div class="t-badge">${days===0?'Hoy':days+' días'}</div></div>`}).join(''):'<div class="hero-sub">Sin eventos próximos.</div>'
+}
+function toggleSwitch(id){document.getElementById(id).classList.toggle('on')}
+function syncDateDisplay(){const el=document.getElementById('itemDate'),out=document.getElementById('dateDisplay');if(!el||!out)return;const d=parseLocalDate(el.value);out.textContent=d?d.toLocaleDateString('es-CR',{day:'2-digit',month:'short',year:'numeric'}).replace('.',''):'Seleccionar'}
+function updateModeUI(){}
+function openEditor(id){
+  const x=id?items.find(i=>i.id===id):null;renderCategoryOptions();
+  document.getElementById('editId').value=x?x.id:'';document.getElementById('sheetTitle').textContent=x?'Editar contador':'Nuevo contador';
+  document.getElementById('itemName').value=x?x.name:'';document.getElementById('itemDate').value=x?x.date:localISO();syncDateDisplay();
+  document.getElementById('itemMode').value=x?x.mode:'elapsed';document.getElementById('itemType').value=x?x.type:'Edad';
+  document.getElementById('itemCategory').value=x?x.category:'General';document.getElementById('itemNote').value=x?x.note:'';
+  document.getElementById('itemTargetDate').value=x?x.targetDate:'';document.getElementById('itemTargetUnit').value=x?(x.targetUnit||'years'):'years';selectedIcon=x?x.icon:'🎂';document.getElementById('favSwitch').classList.toggle('on',!!(x&&x.favorite));
+  document.getElementById('detailBtn').style.display=x?'block':'none';document.getElementById('archiveBtn').style.display=x?'block':'none';document.getElementById('archiveBtn').textContent=x&&x.archived?'Reactivar':'Archivar';
+  document.getElementById('deleteBtn').style.display=x?'block':'none';renderIcons();document.getElementById('editorOverlay').classList.add('on')
+}
+function renderIcons(){document.getElementById('iconGrid').innerHTML=ICONS.map(i=>`<button type="button" class="icon-opt ${i===selectedIcon?'on':''}" onclick="selectedIcon='${i}';renderIcons()">${i}</button>`).join('')}
+function closeEditor(){document.getElementById('editorOverlay').classList.remove('on')}
+function saveItem(){
+  const id=document.getElementById('editId').value,name=document.getElementById('itemName').value.trim(),date=document.getElementById('itemDate').value,mode=document.getElementById('itemMode').value;
+  if(!name)return toast('Agrega un nombre');if(!date)return toast('Selecciona una fecha');
+  if(mode==='elapsed'&&parseLocalDate(date)>todayNoon())return toast('Para tiempo transcurrido la fecha debe ser pasada');
+  if(mode==='countdown'&&parseLocalDate(date)<todayNoon())return toast('Para cuenta regresiva usa una fecha futura');
+  const prev=id?items.find(x=>x.id===id):null;
+  const o=normalizeItem({...prev,id:id||uid(),name,date,mode,type:document.getElementById('itemType').value,category:document.getElementById('itemCategory').value.trim()||'General',icon:selectedIcon,note:document.getElementById('itemNote').value.trim(),favorite:document.getElementById('favSwitch').classList.contains('on'),targetDate:document.getElementById('itemTargetDate').value,targetUnit:document.getElementById('itemTargetUnit').value,milestones:prev?prev.milestones:[]});
+  if(id){const i=items.findIndex(x=>x.id===id);items[i]=o}else items.push(o);saveDisk();closeEditor();render();toast(id?'Actualizado':'Agregado')
+}
+function toggleArchiveCurrent(){const id=document.getElementById('editId').value,x=items.find(i=>i.id===id);if(!x)return;x.archived=!x.archived;saveDisk();closeEditor();render();toast(x.archived?'Archivado':'Reactivado')}
+function deleteCurrent(){const id=document.getElementById('editId').value,x=items.find(i=>i.id===id);if(!x)return;if(!confirm(`¿Eliminar permanentemente "${x.name}"?`))return;items=items.filter(i=>i.id!==id);saveDisk();closeEditor();render();toast('Eliminado')}
+function openDetailFromEditor(){const id=document.getElementById('editId').value;closeEditor();openDetail(id)}
+function openDetail(id){detailId=id;const x=items.find(i=>i.id===id);if(!x)return;renderDetail();document.getElementById('detailOverlay').classList.add('on')}
+function closeDetail(){document.getElementById('detailOverlay').classList.remove('on')}
+function editFromDetail(){const id=detailId;closeDetail();openEditor(id)}
+function renderDetail(){
+  const x=items.find(i=>i.id===detailId);if(!x)return;const a=displayAge(x),days=totalDays(x),weeks=Math.floor(days/7),evt=nextAnniversary(x),until=evt?daysUntil(evt):0,remaining=targetRemaining(x);
+  let progressHtml='';if(x.targetDate&&x.mode==='elapsed'){const s=parseLocalDate(x.date),t=parseLocalDate(x.targetDate),n=todayNoon();if(s&&t&&t>s){const pct=Math.max(0,Math.min(100,Math.round(((n-s)/(t-s))*100)));progressHtml=`<div class="stat" style="grid-column:1/-1"><div class="stat-k">Vida útil / objetivo</div><div class="stat-v">${pct}%</div><div class="progress"><div style="width:${pct}%"></div></div><div class="item-meta">${fmtDate(x.date)} → ${fmtDate(x.targetDate)}</div></div>`}}
+  const ms=(x.milestones||[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  document.getElementById('detailContent').innerHTML=`<div class="detail-hero"><div class="detail-name">${x.icon} ${esc(x.name)}</div><div class="detail-age">${a.years} años · ${a.months} meses · ${a.days} días</div><div class="detail-meta">${x.mode==='countdown'?'Faltan':'Desde'} ${fmtDate(x.date)} · ${esc(x.category)}</div></div>
+  <div class="stats-grid"><div class="stat"><div class="stat-k">Días totales</div><div class="stat-v">${days.toLocaleString('es-CR')}</div></div><div class="stat"><div class="stat-k">Semanas</div><div class="stat-v">${weeks.toLocaleString('es-CR')}</div></div><div class="stat"><div class="stat-k">${x.mode==='countdown'?'Objetivo':'Próximo aniversario'}</div><div class="stat-v">${until} días</div></div><div class="stat"><div class="stat-k">Estado</div><div class="stat-v">${x.archived?'Archivado':'Activo'}</div></div>${remaining?`<div class="stat" style="grid-column:1/-1"><div class="stat-k">Faltante de vida útil</div><div class="stat-v">${remaining.expired?'Cumplido':remaining.value+' '+remaining.label}</div><div class="item-meta">Objetivo: ${fmtDate(x.targetDate)}</div></div>`:''}${progressHtml}</div>
+  ${x.note?`<div class="backup-card"><div class="backup-title">Nota</div><div class="backup-sub">${esc(x.note)}</div></div>`:''}
+  <div class="milestones"><div class="section-head" style="margin:12px 0 4px"><div class="backup-title">Milestones</div><button class="mini" onclick="openMilestone('${x.id}')">＋</button></div>${ms.length?ms.map(m=>`<div class="milestone"><div class="m-dot"></div><div class="m-main"><div class="m-title">${esc(m.title)}</div><div class="m-meta">${fmtDate(m.date)}${m.note?' · '+esc(m.note):''}</div></div></div>`).join(''):'<div class="hero-sub">Sin milestones todavía.</div>'}</div>`
+}
+function openMilestone(id){document.getElementById('milestoneItemId').value=id;document.getElementById('milestoneTitle').value='';document.getElementById('milestoneDate').value=localISO();document.getElementById('milestoneNote').value='';document.getElementById('milestoneOverlay').classList.add('on')}
+function saveMilestone(){const id=document.getElementById('milestoneItemId').value,x=items.find(i=>i.id===id),title=document.getElementById('milestoneTitle').value.trim(),date=document.getElementById('milestoneDate').value;if(!x||!title||!date)return toast('Completa título y fecha');x.milestones.push({id:uid(),title,date,note:document.getElementById('milestoneNote').value.trim()});saveDisk();closeModal('milestoneOverlay');detailId=id;renderDetail();toast('Milestone agregado')}
+function closeModal(id){document.getElementById(id).classList.remove('on')}
+async function shareCurrentCard(){
+  const x=items.find(i=>i.id===detailId);if(!x)return;const a=displayAge(x),canvas=document.createElement('canvas');canvas.width=1200;canvas.height=630;const c=canvas.getContext('2d');
+  const g=c.createLinearGradient(0,0,1200,630);g.addColorStop(0,'#203B5F');g.addColorStop(1,'#315C8D');c.fillStyle=g;c.fillRect(0,0,1200,630);
+  c.fillStyle='rgba(255,255,255,.10)';c.beginPath();c.arc(1080,315,230,0,Math.PI*2);c.fill();
+  c.fillStyle='#AFC0D3';c.font='700 34px -apple-system,Arial';c.fillText('TIMEKEEP',70,90);
+  c.fillStyle='#FFFFFF';c.font='800 66px -apple-system,Arial';c.fillText(x.name,70,200);
+  c.font='850 150px -apple-system,Arial';c.fillText(String(a.years),70,420);
+  c.font='700 38px -apple-system,Arial';c.fillStyle='#B8C7D8';c.fillText('AÑOS',230,415);
+  c.font='800 66px -apple-system,Arial';c.fillStyle='#FFFFFF';c.fillText(`${a.months} meses  ·  ${a.days} días`,540,405);
+  c.font='500 30px -apple-system,Arial';c.fillStyle='#B8C7D8';c.fillText(x.mode==='countdown'?'Cuenta regresiva':'Tiempo transcurrido',70,520);
+  const blob=await new Promise(r=>canvas.toBlob(r,'image/png'));const file=new File([blob],`TimeKeep-${x.name}.png`,{type:'image/png'});
+  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:x.name,text:`${a.years} años, ${a.months} meses y ${a.days} días`});return}catch(e){}}
+  const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=file.name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Tarjeta generada')
+}
+function exportJSON(){const payload={app:'TimeKeep',version:5,exportedAt:new Date().toISOString(),count:items.length,items};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='TimeKeep-v5-'+localISO().replaceAll('-','')+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('JSON exportado')}
+function previewImport(event){const file=event.target.files&&event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const d=JSON.parse(reader.result),arr=Array.isArray(d)?d:d.items;if(!Array.isArray(arr))throw 0;pendingImport=arr.map(normalizeItem);document.getElementById('importCount').textContent=pendingImport.length;document.getElementById('importInfo').textContent=`${file.name} · Elige Fusionar para conservar tus registros actuales o Reemplazar para usar solo este respaldo.`;document.getElementById('importOverlay').classList.add('on')}catch(e){toast('JSON inválido')}event.target.value=''};reader.readAsText(file)}
+function applyImport(mode){if(!pendingImport)return;if(mode==='replace')items=pendingImport;else{const map=new Map(items.map(x=>[x.id,x]));pendingImport.forEach(x=>map.set(x.id,x));items=[...map.values()]};pendingImport=null;saveDisk();closeModal('importOverlay');render();toast(mode==='replace'?'Respaldo reemplazado':'Respaldo fusionado')}
+function cancelImport(){pendingImport=null;closeModal('importOverlay')}
+function render(){renderDashboard();renderManage();renderTimeline()}
+let tm;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tm);tm=setTimeout(()=>t.classList.remove('show'),2200)}
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on')}));
+let sx=0,sy=0;const touch=document.getElementById('dashboardTouch');touch.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});touch.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.3)changePage(dx<0?1:-1)},{passive:true});
+setInterval(()=>{renderDashboard();renderTimeline()},60000);
+load();render();
+</script>
+</body>
+</html>
